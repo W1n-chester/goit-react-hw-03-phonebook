@@ -3,21 +3,34 @@ import { nanoid } from 'nanoid';
 import { Form } from './Form/Form';
 import { Phonebook, Contacts } from './App.styled';
 import { ContactList } from './Contact-List/Contact-list';
+const CONTACTS = [
+  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+  { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+  { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+];
 export class App extends React.Component {
   state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+    contacts: [],
     filter: '',
   };
-  deleteContact = (id) => {
-    this.setState(prevState => (
-    { contacts: prevState.contacts.filter(contact=>contact.id!==id)}
-  ))
-}
+  componentDidMount() {
+    const contacts = JSON.parse(localStorage.getItem('contacts'));
+    contacts
+      ? this.setState({ contacts })
+      : this.setState({ contacts: CONTACTS });
+    
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.contacts !== prevState.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
+  deleteContact = id => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== id),
+    }));
+  };
   addContact = ({ name, number }) => {
     const newContact = { id: nanoid(), name, number };
 
@@ -41,13 +54,13 @@ export class App extends React.Component {
       <Phonebook>
         <h2>Phonebook</h2>
         <Contacts>
-        <Form onAddContact={this.addContact} />
-        <ContactList
-          filter={filter}
-          onFilter={this.changeFilter}
-          contacts={visibleContacts}
-          onDeleteContact={this.deleteContact}
-        />
+          <Form onAddContact={this.addContact} />
+          <ContactList
+            filter={filter}
+            onFilter={this.changeFilter}
+            contacts={visibleContacts}
+            onDeleteContact={this.deleteContact}
+          />
         </Contacts>
       </Phonebook>
     );
